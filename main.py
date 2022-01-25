@@ -112,12 +112,22 @@ class EventQueueGenerator:
 
         if gs_event['event_name'] == 'gs_start' and pearl_event['event_name'] == 'pearl_start':
             print('gs_start -> pearl_start')
+            self.gs_event_queue.append(gs_event)
+            self.pearl_event_queue.append(pearl_event)
         elif gs_event['event_name'] == 'gs_start' and pearl_event['event_name'] == 'pearl_end':
-            print('gs_start -> pearl_end')
-        elif gs_event['event_name'] == 'gs_end' and pearl_event['event_name'] == 'pearl_start' :
-            print('pearl_start -> gs_end')
+            print(f'gs_start -> pearl_end - Common One Day Record  {gs_event["event_date"]}')
+            gs_event['event_date'] = gs_event['event_date'] + timedelta(days=1)
+            self.gs_event_queue.append(gs_event)
+            self.pearl_event_queue.pop()
+        elif gs_event['event_name'] == 'gs_end' and pearl_event['event_name'] == 'pearl_start':
+            print(f'pearl_start -> gs_end - Common Record {pearl_event["event_date"]}')
+            pearl_event['event_date'] = pearl_event['event_date'] + timedelta(days=1)
+            self.pearl_event_queue.append(pearl_event)
+            self.gs_event_queue.pop()
         elif gs_event['event_name'] == 'gs_end' and pearl_event['event_name'] == 'pearl_end':
             print('pearl_end -> gs_end')
+            self.gs_event_queue.pop()
+            self.pearl_event_queue.pop()
         else:
             raise Exception("Cannot Handle this scenario. Ranges have issues")
 
