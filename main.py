@@ -7,7 +7,7 @@ gs_data_obj = {
 }
 
 pearl_data_obj = {
-    'start': ['2022-01-03', '2022-01-09'],
+    'start': ['2022-01-03', '2022-01-11'],
     'end': ['2022-01-08', '2022-01-15']
 }
 
@@ -51,7 +51,7 @@ class EventQueueGenerator:
             if len(events_of_date) == 1:
                 self.handle_single_event(events_of_date.iloc[0])
             else:
-                pass
+                self.handle_dual_events(events_of_date)
 
     def handle_single_event(self, event_info):
         if event_info['event_name'] == 'gs_start':
@@ -105,6 +105,21 @@ class EventQueueGenerator:
                     f"Start : {pearl_record['event_date']}, End : {event_info['event_date']}")
 
             self.pearl_event_queue.pop()
+
+    def handle_dual_events(self, event_info_list):
+        gs_event = event_info_list[event_info_list['event_name'].str.startswith('gs_')].iloc[0]
+        pearl_event = event_info_list[event_info_list['event_name'].str.startswith('pearl_')].iloc[0]
+
+        if gs_event['event_name'] == 'gs_start' and pearl_event['event_name'] == 'pearl_start':
+            print('gs_start -> pearl_start')
+        elif gs_event['event_name'] == 'gs_start' and pearl_event['event_name'] == 'pearl_end':
+            print('gs_start -> pearl_end')
+        elif gs_event['event_name'] == 'gs_end' and pearl_event['event_name'] == 'pearl_start' :
+            print('pearl_start -> gs_end')
+        elif gs_event['event_name'] == 'gs_end' and pearl_event['event_name'] == 'pearl_end':
+            print('pearl_end -> gs_end')
+        else:
+            raise Exception("Cannot Handle this scenario. Ranges have issues")
 
 
 eqg = EventQueueGenerator()
